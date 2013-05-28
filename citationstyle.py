@@ -15,7 +15,7 @@ class CitationStyleRobot(object):
         self.categories = [
             Category(self.site, "Category:Pages with citations having wikilinks embedded in URL titles"),
             ]
-        self.doTaskPage = pywikibot.Page(self.wd, 'User:Hazard-Bot/DoTask/21')
+        self.doTaskPage = pywikibot.Page(self.site, 'User:Hazard-Bot/DoTask/21')
 
     def checkDoTaskPage(self):
         try:
@@ -42,6 +42,7 @@ class CitationStyleRobot(object):
                             else:
                                 self.code.replace(link, link.title)
         ## @fixme: Use a function, and use {{Cite doi}} as well, just in case...
+        ## ...or generate from [[Category:Citation Style 1 templates]]? (doesn't include {{citation}} though)
         #template = pywikibot.Page(self.site, "Template:Cite web")
         #templates = list()
         #templates.append(template.title(withNamespace = False).lower())
@@ -49,7 +50,9 @@ class CitationStyleRobot(object):
         #for reference in references:
         #    templates.append(reference.title(withNamespace = False).lower())
         for template in self.code.filter_templates():
-            if template.name.lower().startswith("cite") or template.name.lower().startswith("web"):
+            if template.name.lower().strip().startswith("cite") \
+            or template.name.lower().strip().startswith("web") \
+            or (template.name.lower().strip() == "citation"):
                 replaceWikilinks(template,             "url", "title"        )
                 replaceWikilinks(template,      "chapterurl", "chapter"      )
                 replaceWikilinks(template,      "chapterurl", "contribution" )
@@ -61,6 +64,7 @@ class CitationStyleRobot(object):
                 replaceWikilinks(template, "contributionurl", "entry"        )
                 replaceWikilinks(template, "contributionurl", "article"      )
                 replaceWikilinks(template,   "transcripturl", "transcript"   )
+
     def run(self):
         for category in self.categories:
             self.checkDoTaskPage()
@@ -70,7 +74,7 @@ class CitationStyleRobot(object):
                     text = self.page.get()
                     self.code = mwparserfromhell.parse(text)
                     self.removeWikilinks()
-                    # and all the others, once they're written, if they're written
+                    # and all the others, once they're coded, if they're coded
                     if text != self.code:
                         pywikibot.showDiff(text, unicode(self.code))
                         self.page.put(self.code, u"[[Wikipedia:Bots|Robot]]: Fixed [[Help:Citation Style 1|citation style]] errors")
