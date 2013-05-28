@@ -41,6 +41,10 @@ class CitationStyleRobot(object):
                                 self.code.replace(link, link.text)
                             else:
                                 self.code.replace(link, link.title)
+                    temps = template.get(title).value.filter_templates()
+                    if temps:
+                        for temp in temps:
+                            self.code.remove(temp)
         ## @fixme: Use a function, and use {{Cite doi}} as well, just in case...
         ## ...or generate from [[Category:Citation Style 1 templates]]? (doesn't include {{citation}} though)
         #template = pywikibot.Page(self.site, "Template:Cite web")
