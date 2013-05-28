@@ -41,20 +41,16 @@ for line in lines:
         templates = code.filter_templates()
         #print templates
         for template in templates:
-            if template.name in templatenames:
+            if template.name.strip().lower() in templatenames:
                 if not template.has_param("nolist"):
                     print "Adding parameter"
-                    print template
-                    a = unicode(template)
+                    template2 = template
                     template.add("nolist", "yes")
-                    print template
-                    b = unicode(template)
+                    code.replace(template2,unicode(template))
+                    newtext = re.sub(r.escape(tag),unicode(code),newtext)
                 else:
                     print "Already has parameter"
-        print code == tag
-        if code != tag:
-            newtext.replace(tag, unicode(code))
-            #re.sub(tag, unicode(code), newtext)
+
         else:
             print "No change to text"
     if oldtext != newtext:
