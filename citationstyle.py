@@ -81,7 +81,7 @@ class CitationStyleRobot(object):
                     # and all the others, once they're coded, if they're coded
                     if text != self.code:
                         pywikibot.showDiff(text, unicode(self.code))
-                        self.page.put(self.code, u"[[Wikipedia:Bots|Robot]]: Fixed [[Help:Citation Style 1|citation style]] errors")
+                        self.page.put(unicode(self.code), u"[[Wikipedia:Bots|Robot]]: Fixed [[Help:Citation Style 1|citation style]] errors")
                     else:
                         print u"Skipping: No change was made"
                 except:
