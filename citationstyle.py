@@ -1,12 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Published by Hazard-SJ (https://meta.wikimedia.org/wiki/User:Hazard-SJ)
+# Published by Hazard-SJ (https://wikitech.wikimedia.org/wiki/User:Hazard-SJ)
 # under the terms of Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)
 # https://creativecommons.org/licenses/by-sa/3.0/
 
-import pywikibot
 import mwparserfromhell
+
+import pywikibot
 from catlib import Category
 
 class CitationStyleRobot(object):
@@ -57,17 +58,17 @@ class CitationStyleRobot(object):
             if template.name.lower().strip().startswith("cite") \
             or template.name.lower().strip().startswith("web") \
             or (template.name.lower().strip() == "citation"):
-                replaceWikilinks(template,             "url", "title"        )
-                replaceWikilinks(template,      "chapterurl", "chapter"      )
-                replaceWikilinks(template,      "chapterurl", "contribution" )
-                replaceWikilinks(template,      "chapterurl", "entry"        )
-                replaceWikilinks(template,      "chapterurl", "article"      )
-                replaceWikilinks(template,   "conferenceurl", "conference"   )
-                replaceWikilinks(template, "contributionurl", "chapter"      )
-                replaceWikilinks(template, "contributionurl", "contribution" )
-                replaceWikilinks(template, "contributionurl", "entry"        )
-                replaceWikilinks(template, "contributionurl", "article"      )
-                replaceWikilinks(template,   "transcripturl", "transcript"   )
+                replaceWikilinks(template, "url", "title")
+                replaceWikilinks(template, "chapterurl", "article")
+                replaceWikilinks(template, "chapterurl", "chapter")
+                replaceWikilinks(template, "chapterurl", "entry" )
+                replaceWikilinks(template, "chapterurl", "contribution")
+                replaceWikilinks(template, "conferenceurl", "conference")
+                replaceWikilinks(template, "contributionurl", "entry")
+                replaceWikilinks(template, "contributionurl", "article")
+                replaceWikilinks(template, "contributionurl", "chapter")
+                replaceWikilinks(template, "contributionurl", "contribution")
+                replaceWikilinks(template, "transcripturl", "transcript")
 
     def run(self):
         for category in self.categories:
