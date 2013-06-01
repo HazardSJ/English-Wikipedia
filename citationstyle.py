@@ -17,6 +17,7 @@ class CitationStyleRobot(object):
             Category(self.site, "Category:Pages with citations having wikilinks embedded in URL titles"),
             ]
         self.doTaskPage = pywikibot.Page(self.site, 'User:Hazard-Bot/DoTask/21')
+        self.subscription = self.getAllTitles("Template:Subscription required")
 
     def checkDoTaskPage(self):
         try:
@@ -31,21 +32,37 @@ class CitationStyleRobot(object):
             else:
                 raise Exception(u"The task has been disabled from the 'do-task page' (%s)." % self.doTaskPage.title(asLink = True))
 
+    def getAllTitles(self, template):
+        page = pywikibot.Page(self.site, template)
+        if page.isRedirectPage():
+            page = page.getRedirectTarget()
+        redirects = page.getReferences(redirectsOnly = True)
+        titles = [page.title(withNamespace = False).lower()]
+        for redirect in redirects:
+            titles.append(redirect.title(withNamespace = False).lower())
+        return titles
+
     def removeWikilinks(self):
         def replaceWikilinks(template, URL, title):
-            if template.has_param(URL):
-                if template.has_param(title):
-                    links = template.get(title).value.filter_links()
-                    if links:
-                        for link in links:
-                            if link.text:
-                                self.code.replace(link, link.text)
-                            else:
-                                self.code.replace(link, link.title)
-                    temps = template.get(title).value.filter_templates()
-                    if temps:
-                        for temp in temps:
-                            self.code.remove(temp)
+            if not template.has_param(URL):
+                return
+            if not template.has_param(title):
+                return
+            links = template.get(title).value.filter_links()
+            if links:
+                for link in links:
+                    if link.text:
+                        template.replace(link, link.text)
+                    else:
+                        template.replace(link, link.title)
+            temps = template.get(title).value.filter_templates()
+            if temps:
+                for temp in temps:
+                    if (temp.name.lower().strip() in self.subscription) and temp.has_param("via"):
+                        template.add("via", temp.get("via").value)
+                    else:
+                        self.code.insert_after(template, temp)
+                    template.get("title").value.remove(temp)
         ## @fixme: Use a function, and use {{Cite doi}} as well, just in case...
         ## ...or generate from [[Category:Citation Style 1 templates]]? (doesn't include {{citation}} though)
         #template = pywikibot.Page(self.site, "Template:Cite web")
