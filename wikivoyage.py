@@ -5,10 +5,16 @@
 # under the terms of Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)
 # https://creativecommons.org/licenses/by-sa/3.0/
 
+from __future__ import unicode_literals
+
 import mwparserfromhell
 
+import config
+from cosmetic_changes import CosmeticChangesToolkit
 import pywikibot
 import xmlreader
+
+config.usernames["wikipedia"]["en"] = "Hazard-Bot"
 
 class WikivoyageBot(object):
     def __init__(self):
@@ -21,23 +27,27 @@ class WikivoyageBot(object):
             "wikivoyage": self.getAllTitles("Template:Wikivoyage")
         }
         self.templates["wikivoyage"].extend(self.getAllTitles("Template:Wikivoyage-inline"))
+        self.cosmeticChanges = CosmeticChangesToolkit(self.wikipedia)
 
     def checkDoTaskPage(self):
         try:
            text = self.doTaskPage.get(force = True)
         except pywikibot.IsRedirectPage:
             raise Warning(
-                "The 'do-task page' (%s) is a redirect." % self.doTaskPage.title(asLink = True)
+                "The 'do-task page' (%s) is a redirect."
+                % self.doTaskPage.title(asLink = True)
             )
         except pywikibot.NoPage:
             raise Warning(
-                "The 'do-task page' (%s) does not exist." % self.doTaskPage.title(asLink = True)
+                "The 'do-task page' (%s) does not exist."
+                % self.doTaskPage.title(asLink = True)
             )
         else:
             if text.strip().lower() == "true":
                 return True
             else:
-                raise Exception("The task has been disabled from the 'do-task page' (%s)."
+                raise Exception(
+                    "The task has been disabled from the 'do-task page' (%s)."
                     % self.doTaskPage.title(asLink = True)
                 )
 
@@ -59,7 +69,7 @@ class WikivoyageBot(object):
                 continue
             voyTitle = page.title
             code = mwparserfromhell.parse(page.text)
-            links = code.filter_links()
+            links = code.filter_wikilinks()
             for link in links:
                 if not link.title.lower().strip().startswith("wikipedia"):
                     continue
@@ -112,7 +122,7 @@ class WikivoyageBot(object):
                 lastSectionText = None
                 for node in code.nodes:
                     if isinstance(node, mwparserfromhell.nodes.heading.Heading):
-                        if "external" or "links" in node.lower():
+                        if ("external" in node.lower()) or ("links" in node.lower()):
                             externalLinksHeading = node
                             break
                     if isinstance(node, mwparserfromhell.nodes.text.Text):
@@ -123,6 +133,11 @@ class WikivoyageBot(object):
                     code.insert_after(
                         lastSectionText,
                         "\n== External links ==%s\n" % voyTemplate
+                    )
+                    code = mwparserfromhell.parse(
+                        self.cosmeticChanges.standardizePageFooter(
+                            unicode(code)
+                        )
                     )
                 else:
                     print "Skipping: Could not insert template"
