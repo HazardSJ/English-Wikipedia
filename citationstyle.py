@@ -6,6 +6,7 @@
 # https://creativecommons.org/licenses/by-sa/3.0/
 
 from __future__ import unicode_literals
+from datetime import datetime
 import re
 
 import mwparserfromhell
@@ -159,8 +160,8 @@ class CitationStyleRobot(object):
         archiveURL = self.template.get("archiveurl").strip()
         if re.search(".*?web\.archive\.org/web/\d*/", archiveURL):
             timestamp = re.compile(".*?web\.archive\.org/web/(?P<date>\d*)/.*").sub("\g<date>", archiveURL)
-            date = timestamp[0:4] + "-" + timestamp[4:6] + "-" + timestamp[6:8]
-            self.template.add("archivedate", date)
+            date = datetime.strptime(timestamp,'%Y%m%d%H%M%S')
+            self.template.add("archivedate", date.strftime("%d %B %Y"))
 
     def run(self):
         for category in self.categories:
