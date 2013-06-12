@@ -167,6 +167,8 @@ class CitationStyleRobot(object):
         for category in self.categories:
             self.checkDoTaskPage()
             for self.page in category.articles():
+                if self.page.namespace():
+                    continue
                 print
                 try:
                     text = self.page.get()
