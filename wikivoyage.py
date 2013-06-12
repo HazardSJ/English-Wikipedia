@@ -9,12 +9,9 @@ from __future__ import unicode_literals
 
 import mwparserfromhell
 
-import config
 from cosmetic_changes import CosmeticChangesToolkit
 import pywikibot
 import xmlreader
-
-config.usernames["wikipedia"]["en"] = "Hazard-Bot"
 
 class WikivoyageBot(object):
     def __init__(self):
@@ -78,6 +75,7 @@ class WikivoyageBot(object):
                     unicode(link.title)
                 ).title(withNamespace = False)
                 yield wpTitle, voyTitle
+                break
 
     def run(self):
         gen = self.parseDump()
