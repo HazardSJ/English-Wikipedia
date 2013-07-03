@@ -139,10 +139,20 @@ class CitationStyleRobot(object):
                 break
         if not empty:
             return
-        self.code.replace(self.template, self.citationNeededTemplate)
+        ref = re.compile(r'(?ism)<ref[ >].*?</ref>')
+        refTags = ref.findall(unicode(self.code))
+        inRefTag = False
+        for refTag in refTags:
+            if unicode(self.template) in refTag:
+                inRefTag = True
+                break
+        if not inRefTag:
+            self.code.replace(self.template, self.citationNeededTemplate)
 
     def getURLFromArchive(self):
-        if not (self.template.has_param("archiveurl") and not self.template.has_param("url")):
+        if not (self.template.has_param("archiveurl") and not \
+                self.template.has_param("url") and not \
+                self.template.has_param("deadurl")):
             return
         archiveURL = self.template.get("archiveurl").strip()
         URL = None
@@ -179,7 +189,7 @@ class CitationStyleRobot(object):
                     if not self.template.name.lower().strip() in self.citationTemplates:
                         continue
                     try:
-                        self.removeWikilinks()
+                        # self.removeWikilinks()  # too many issues, unless coded for specific cases
                         self.fixEmptyCitations()
                         self.getURLFromArchive()
                         self.getArchiveDate()
