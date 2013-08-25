@@ -171,7 +171,7 @@ class CitationStyleRobot(object):
         if re.search(".*?web\.archive\.org/web/\d*/", archiveURL):
             timestamp = re.compile(".*?web\.archive\.org/web/(?P<date>\d*)/.*").sub("\g<date>", archiveURL)
             date = datetime.strptime(timestamp,'%Y%m%d%H%M%S')
-            self.template.add("archivedate", date.strftime("%d %B %Y"))
+            self.template.add("archivedate", (date.strftime("%d %B %Y")).lstrip("0"))
 
     def run(self):
         for category in self.categories:
