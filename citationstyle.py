@@ -115,9 +115,6 @@ class CitationStyleRobot(object):
                             self.template.remove("language")
                         self.template.add("language", self.getLanguage(temp.name.lower().strip()[5:]))
                         self.template.get(title).value.replace(temp, temp.get(1).value)
-                    else:
-                        self.code.insert_after(self.template, temp)
-                        self.template.get(title).value.remove(temp)
         replaceWikilinks("url", "title")
         replaceWikilinks("chapterurl", "article")
         replaceWikilinks("chapterurl", "chapter")
@@ -189,7 +186,7 @@ class CitationStyleRobot(object):
                     if not self.template.name.lower().strip() in self.citationTemplates:
                         continue
                     try:
-                        # self.removeWikilinks()  # too many issues, unless coded for specific cases
+                        self.removeWikilinks()
                         self.fixEmptyCitations()
                         self.getURLFromArchive()
                         self.getArchiveDate()
