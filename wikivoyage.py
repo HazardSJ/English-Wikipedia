@@ -9,7 +9,7 @@ from __future__ import unicode_literals
 
 import mwparserfromhell
 
-from cosmetic_changes import CosmeticChangesToolkit
+#from cosmetic_changes import CosmeticChangesToolkit
 import pywikibot
 import xmlreader
 
@@ -18,13 +18,13 @@ class WikivoyageBot(object):
         self.wikipedia = pywikibot.Site("en", "wikipedia")
         self.wikivoyage = pywikibot.Site("en", "wikivoyage")
         self.doTaskPage = pywikibot.Page(self.wikipedia, "User:Hazard-Bot/DoTask/Wikivoyage")
-        self.dumpFile = "/public/datasets/public/enwikivoyage/20130528/enwikivoyage-20130528-pages-articles.xml.bz2"
+        self.dumpFile = "/public/datasets/public/enwikivoyage/20130814/enwikivoyage-20130814-pages-articles.xml.bz2"
         self.templates = {
             "sister": self.getAllTitles("Template:Sister project links"),
             "wikivoyage": self.getAllTitles("Template:Wikivoyage")
         }
         self.templates["wikivoyage"].extend(self.getAllTitles("Template:Wikivoyage-inline"))
-        self.cosmeticChanges = CosmeticChangesToolkit(self.wikipedia)
+        #self.cosmeticChanges = CosmeticChangesToolkit(self.wikipedia)
 
     def checkDoTaskPage(self):
         try:
@@ -64,6 +64,10 @@ class WikivoyageBot(object):
         for page in gen:
             if page.ns != "0":
                 continue
+            #### For trial purposes
+            if page.title.startswith("A"):
+                continue
+            #### the above is for trial purposes
             voyTitle = page.title
             code = mwparserfromhell.parse(page.text)
             links = code.filter_wikilinks()
@@ -117,28 +121,40 @@ class WikivoyageBot(object):
             else:
                 voyTemplate = "\n{{Wikivoyage|%s}}" % voyPage.title()
                 externalLinksHeading = None
-                lastSectionText = None
                 for node in code.nodes:
                     if isinstance(node, mwparserfromhell.nodes.heading.Heading):
                         if ("external" in node.lower()) or ("links" in node.lower()):
                             externalLinksHeading = node
                             break
-                    if isinstance(node, mwparserfromhell.nodes.text.Text):
-                        lastSectionText = node
                 if externalLinksHeading:
                     code.insert_after(externalLinksHeading, voyTemplate)
-                elif lastSectionText:
-                    code.insert_after(
-                        lastSectionText,
-                        "\n== External links ==%s\n" % voyTemplate
-                    )
-                    code = mwparserfromhell.parse(
-                        self.cosmeticChanges.standardizePageFooter(
-                            unicode(code)
-                        )
-                    )
                 else:
-                    print "Skipping: Could not insert template"
+                    putBefore = None
+                    for node2 in reversed(code.nodes):
+                        try:
+                            if (isinstance(node2, mwparserfromhell.nodes.template.Template) and (
+                                node2.name.strip().lower().startswith("defaultsort:") or
+                                "stub" in node2.name.strip().lower() or
+                                node2.name.strip().lower() == "person data" or
+                                node2.name.strip().lower() == "authority control" or
+                                "navbox" in pywikibot.Page(self.wikipedia, "Template:"+node2.name.strip()).get() or
+                                node2.name.strip().lower().startswith("coord")
+                                )
+                            ) or (isinstance(node2, mwparserfromhell.nodes.wikilink.Wikilink) and
+                                node2.title.strip().lower().startswith("category:")
+                            ):
+                                putBefore = node2
+                        except:
+                            continue
+                    if putBefore:
+                        code.insert_before(putBefore, "%s\n\n" % voyTemplate)
+#                    code = mwparserfromhell.parse(
+#                        self.cosmeticChanges.standardizePageFooter(
+#                            unicode(code)
+#                        )
+#                    )
+#                else:
+#                    print "Skipping: Could not insert template"
             wpPageCats = [category.title() for category in wpPage.categories(api = True)]
             if "Category:All article disambiguation pages" in wpPageCats:
                 print "Skipping: Disambiguation page"
