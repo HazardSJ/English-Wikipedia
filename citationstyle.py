@@ -18,6 +18,7 @@ class CitationStyleRobot(object):
     def __init__(self):
         self.site = pywikibot.Site("en", "wikipedia")
         self.categories = [
+            Category(self.site, "Category:Pages using citations with accessdate and no URL"),
             Category(self.site, "Category:Pages with archiveurl citation errors"),
             Category(self.site, "Category:Pages with citations having wikilinks embedded in URL titles"),
             Category(self.site, "Category:Pages with empty citations")
@@ -170,6 +171,14 @@ class CitationStyleRobot(object):
             date = datetime.strptime(timestamp,'%Y%m%d%H%M%S')
             self.template.add("archivedate", (date.strftime("%d %B %Y")).lstrip("0"))
 
+    def removeAccessdate(self):
+        if not (self.template.has_param("accessdate") and not
+                self.template.has_param("url") and not
+                self.template.has_param("archiveurl") and not
+                self.template.has_param("deadurl")):
+            return
+        self.template.remove("accessdate")
+
     def run(self):
         for category in self.categories:
             self.checkDoTaskPage()
@@ -186,10 +195,11 @@ class CitationStyleRobot(object):
                     if not self.template.name.lower().strip() in self.citationTemplates:
                         continue
                     try:
-                        self.removeWikilinks()
                         self.fixEmptyCitations()
-                        self.getURLFromArchive()
                         self.getArchiveDate()
+                        self.getURLFromArchive()
+                        self.removeAccessdate()
+                        self.removeWikilinks()
                     except:
                         print "Skipping: Error encountered while processing"
                 if text == self.code:
